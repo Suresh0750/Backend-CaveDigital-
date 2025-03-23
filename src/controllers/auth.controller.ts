@@ -12,10 +12,19 @@ export const register = async (req: Request, res: Response,next:NextFunction):Pr
   try {
     const { name, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+        res.status(HttpStatus.BadRequest).json({ success: false, message: "User already exists" });
+        return
+    } 
+
     const user = await User.create({ name, email, password: hashedPassword });
-    res.status(HttpStatus.Created).json({ message: "User registered successfully" });
+    
+
+    res.status(HttpStatus.Created).json({success: true, message: "User registered successfully",user });
   } catch (error) {
-    next(error)
+    next( error)
   }
 };
 
@@ -24,12 +33,14 @@ export const login = async (req: Request, res: Response,next:NextFunction):Promi
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            res.status(HttpStatus.Unauthorized).json({ message: "Invalid credentials" });
+        const isPasswordValid = await bcrypt.compare(password, user?.password || "");
+        console.log(isPasswordValid,"isPasswordValid")
+        if (!user || !isPasswordValid) {
+            res.status(HttpStatus.Unauthorized).json({success: false, message: "Invalid credentials" });
             return
         }
         const token = jwt.sign({ userId: user._id }, String(JWT_SECRET()), { expiresIn: "1h" });
-        res.json({ token });
+        res.status(HttpStatus.Success).json({ success: true, message: "User logged in successfully", token });
         
     } catch (error) {
         next(error)

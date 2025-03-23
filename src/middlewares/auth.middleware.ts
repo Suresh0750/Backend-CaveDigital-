@@ -1,15 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { HttpStatus } from "../utils/HttpStatusCode";
+import { AuthenticatedRequest } from "../utils/customRequest";
 
-export interface AuthenticatedRequest extends Request {
-  userId?: string;
-}
 
 export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction):void => {
   const token = req.header("Authorization")?.split(" ")[1];
 
   if (!token) {
-     res.status(401).json({ message: "Access denied" }); 
+     res.status(HttpStatus.Unauthorized).json({success: false, message: "Access denied" }); 
      return
   }
 
@@ -18,7 +17,7 @@ export const authenticate = (req: AuthenticatedRequest, res: Response, next: Nex
     req.userId = decoded.userId;
     next(); // ✅ Call next() if successful
   } catch {
-     res.status(401).json({ message: "Invalid token" }); 
+     res.status(HttpStatus.Unauthorized).json({success: false, message: "Invalid token" }); 
      return
   }
 };
