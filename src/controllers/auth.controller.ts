@@ -32,7 +32,6 @@ export const login = async (req: Request, res: Response,next:NextFunction):Promi
         const { email, password } = req.body;
         const user = await User.findOne({ email });
         const isPasswordValid = await bcrypt.compare(password, user?.password || "");
-        console.log(isPasswordValid,"isPasswordValid")
         if (!user || !isPasswordValid) {
             res.status(HttpStatus.Unauthorized).json({success: false, message: "Invalid credentials" });
             return
