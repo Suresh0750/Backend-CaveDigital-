@@ -49,7 +49,7 @@ export const updateTask = async (req: AuthenticatedRequest, res: Response,next:N
     const { title, description } = req.body;
     const existingTask = await Task.findOne({ _id: req.params.id});
     if(!existingTask){
-      res.status(HttpStatus.NotFound).json({ message: "Task not found" });
+      res.status(HttpStatus.NotFound).json({success: false, message: "Task not found" });
       return
     }
     const updatedTask = await Task.findOneAndUpdate(
